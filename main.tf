@@ -26,7 +26,6 @@ locals {
   }
 }
 
-
 resource "aws_api_gateway_rest_api" "gateway" {
   name           = var.api_name
   api_key_source = "HEADER"
