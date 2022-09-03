@@ -82,7 +82,7 @@ resource "aws_lambda_permission" "invoke_from_gateway" {
 
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = data.aws_lambda_function.lambdas[each.key].arn
+  function_name = aws_lambda_alias.lambda_aliases[each.key].arn
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.gateway.id}/*/${each.value.method}${each.value.path}"
