@@ -13,3 +13,8 @@ variable "api_version" {
   description = "A semantic version number for the api"
   default     = "1.0"
 }
+
+variable "cognito_pool_name" {
+  type = string
+  default = ""
+}
