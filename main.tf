@@ -20,8 +20,8 @@ locals {
           path          = path,
           method        = upper(method)
           function_name = info.function
-          authorization = length(info.authorization) > 0 ? info.authorization : "NONE"
-          authorizer_id = length(info.authorizer_id) > 0 ? info.authorizer_id : null
+          authorization = info.authorization != null && length(info.authorization) > 0 ? info.authorization : "NONE"
+          authorizer_id = info.authorizer_id != null && length(info.authorizer_id) > 0 ? info.authorizer_id : null
         }
       ]
     ]) : i => v
