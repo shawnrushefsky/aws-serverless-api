@@ -45,7 +45,7 @@ resource "aws_lambda_alias" "lambda_aliases" {
 
 resource "aws_api_gateway_rest_api" "gateway" {
   name           = var.api_name
-  api_key_source = "HEADER"
+  api_key_source = "AUTHORIZER"
 }
 
 resource "aws_api_gateway_resource" "paths" {
