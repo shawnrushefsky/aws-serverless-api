@@ -17,16 +17,16 @@ locals {
     for i, v in flatten([
       for path, config in var.api_spec : [
         for method, function_name in config : {
-          path   = path,
-          method = upper(method)
-          function_name    = function_name
+          path          = path,
+          method        = upper(method)
+          function_name = function_name
         }
       ]
     ]) : i => v
   }
 }
 
-data "aws_lambda_function" {
+data "aws_lambda_function" "lambdas" {
   for_each = local.all_methods
 
   function_name = each.value.function_name
@@ -62,7 +62,7 @@ resource "aws_api_gateway_integration" "endpoints" {
   rest_api_id             = aws_api_gateway_rest_api.gateway.id
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
-  uri                     = data.aws_lambda_function[each.key].invoke_arn
+  uri                     = data.aws_lambda_function.lambdas[each.key].invoke_arn
 }
 
 resource "aws_lambda_permission" "invoke_from_gateway" {
@@ -70,7 +70,7 @@ resource "aws_lambda_permission" "invoke_from_gateway" {
 
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = data.aws_lambda_function[each.key].arn
+  function_name = data.aws_lambda_function.lambdas[each.key].arn
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.gateway.id}/*/${each.value.method}${each.value.path}"
