@@ -1,5 +1,5 @@
 output "lambda_aliases" {
-  value = { for i, value in local.all_methods: value.function_name => aws_lambda_alias.lambda_aliases[i].arn}
+  value = { for i, value in local.all_methods : value.function_name => aws_lambda_alias.lambda_aliases[i].arn }
 }
 
 output "invoke_url" {

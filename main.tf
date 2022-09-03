@@ -20,8 +20,8 @@ locals {
           path          = path,
           method        = upper(method)
           function_name = info.function
-          authorization = info.authorization != null && length(info.authorization) > 0 ? info.authorization : "NONE"
-          authorizer_id = info.authorizer_id != null && length(info.authorizer_id) > 0 ? info.authorizer_id : null
+          authorization = length(info.authorization) > 0 ? info.authorization : "NONE"
+          authorizer_id = length(info.authorizer_id) > 0 ? info.authorizer_id : null
         }
       ]
     ]) : i => v
@@ -37,9 +37,9 @@ data "aws_lambda_function" "lambdas" {
 resource "aws_lambda_alias" "lambda_aliases" {
   for_each = local.all_methods
 
-  name = "${var.api_name}-${each.value.function_name}"
-  description = "An alias that sits between the gateway and the lambda"
-  function_name = each.value.function_name
+  name             = "${var.api_name}-${each.value.function_name}"
+  description      = "An alias that sits between the gateway and the lambda"
+  function_name    = each.value.function_name
   function_version = "$LATEST"
 }
 
@@ -82,10 +82,11 @@ resource "aws_lambda_permission" "invoke_from_gateway" {
 
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_alias.lambda_aliases[each.key].arn
+  function_name = data.aws_lambda_function.lambdas[each.key].function_name
+  qualifier     = aws_lambda_alias.lambda_aliases[each.key].name
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.gateway.id}/*/${each.value.method}${each.value.path}"
+  source_arn = "${aws_api_gateway_rest_api.gateway.execution_arn}/*/${each.value.method}/*"
 }
 
 resource "aws_api_gateway_deployment" "deployment" {
@@ -101,6 +102,6 @@ resource "aws_api_gateway_deployment" "deployment" {
 
 resource "aws_api_gateway_stage" "prod" {
   deployment_id = aws_api_gateway_deployment.deployment.id
-  rest_api_id = aws_api_gateway_rest_api.gateway.id
-  stage_name = "prod"
+  rest_api_id   = aws_api_gateway_rest_api.gateway.id
+  stage_name    = "prod"
 }
