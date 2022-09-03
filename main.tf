@@ -32,6 +32,15 @@ data "aws_lambda_function" "lambdas" {
   function_name = each.value.function_name
 }
 
+resource "aws_lambda_alias" "lambda_aliases" {
+  for_each = local.all_methods
+
+  name = "${var.api_name}-${each.value.function_name}"
+  description = "An alias that sits between the gateway and the lambda"
+  function_name = each.value.function_name
+  function_version = "$LATEST"
+}
+
 resource "aws_api_gateway_rest_api" "gateway" {
   name           = var.api_name
   api_key_source = "HEADER"
@@ -62,7 +71,7 @@ resource "aws_api_gateway_integration" "endpoints" {
   rest_api_id             = aws_api_gateway_rest_api.gateway.id
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
-  uri                     = data.aws_lambda_function.lambdas[each.key].invoke_arn
+  uri                     = aws_lambda_alias.lambda_aliases[each.key].invoke_arn
 }
 
 resource "aws_lambda_permission" "invoke_from_gateway" {
@@ -74,4 +83,21 @@ resource "aws_lambda_permission" "invoke_from_gateway" {
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.gateway.id}/*/${each.value.method}${each.value.path}"
+}
+
+resource "aws_api_gateway_deployment" "deployment" {
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+
+  triggers = {
+    redeployment = sha1(jsonencode(local.all_methods))
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_api_gateway_stage" "prod" {
+  deployment_id = aws_api_gateway_deployment.deployment.id
+  rest_api_id = aws_api_gateway_rest_api.gateway.id
+  stage_name = "prod"
 }
