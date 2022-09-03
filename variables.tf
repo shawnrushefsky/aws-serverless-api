@@ -1,6 +1,6 @@
 variable "api_spec" {
   type        = map(map(string))
-  description = "A map like { endpoint: { method: lambda_arn }}"
+  description = "A map like { endpoint: { method: lambda_name }}"
 }
 
 variable "api_name" {
