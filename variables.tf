@@ -1,6 +1,6 @@
 variable "api_spec" {
-  type        = map(map(string))
-  description = "A map like { endpoint: { method: lambda_name }}"
+  type        = map(map(map(string)))
+  description = "A map like { endpoint: { method: { function, authorization?, authorizer_id?} }}"
 }
 
 variable "api_name" {
@@ -12,9 +12,4 @@ variable "api_version" {
   type        = string
   description = "A semantic version number for the api"
   default     = "1.0"
-}
-
-variable "cognito_pool_name" {
-  type = string
-  default = ""
 }
