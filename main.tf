@@ -96,7 +96,7 @@ resource "aws_api_gateway_deployment" "deployment" {
     redeployment = sha1(jsonencode(local.all_methods))
   }
   lifecycle {
-    create_before_destroy = true
+    create_before_destroy = false
   }
 }
 
