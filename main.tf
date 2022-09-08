@@ -37,7 +37,7 @@ data "aws_lambda_function" "lambdas" {
 resource "aws_lambda_alias" "lambda_aliases" {
   for_each = local.all_methods
 
-  name             = "${var.api_name}-${each.value.function_name}"
+  name             = "${var.api_name}-${each.value.function_name}-${each.key}"
   description      = "An alias that sits between the gateway and the lambda"
   function_name    = each.value.function_name
   function_version = "$LATEST"
