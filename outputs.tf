@@ -13,3 +13,7 @@ output "api_id" {
 output "resources" {
   value = { for i, value in aws_api_gateway_resource.paths : value.path_part => value.id }
 }
+
+output "execution_arn" {
+  value = aws_api_gateway_rest_api.gateway.execution_arn
+}
